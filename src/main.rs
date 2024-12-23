@@ -1,3 +1,8 @@
+
+
+mod cli;
+
 fn main() {
-    println!("Hello, world!");
+    let args = cli::Opts::parse_args();
+    println!("{:#?}", args);
 }
