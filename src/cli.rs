@@ -8,7 +8,7 @@ pub struct Opts {
     /// Assembly file
     #[clap(short, long)]
     assembly: String,
-    /// the outprefix
+    /// outprefix
     #[clap(short, long)]
     outprefix: String,
 }
