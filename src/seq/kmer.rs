@@ -1,3 +1,8 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unreachable_code)]
+
 use std::collections::HashMap;
 
 #[derive(Debug)]
