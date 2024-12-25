@@ -14,6 +14,14 @@ pub struct Opts {
 }
 
 impl Opts {
+    pub fn assembly(&self) -> &str {
+        &self.assembly
+    }
+
+    pub fn outprefix(&self) -> &str {
+        &self.outprefix
+    }
+
     pub fn parse_args() -> Self {
         Self::parse()
     }
