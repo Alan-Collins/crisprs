@@ -12,9 +12,9 @@ pub struct KmerTable {
 }
 
 impl KmerTable {
-    pub fn new(seq_id: &String) -> Self{
+    pub fn new(seq_id: &str) -> Self{
         Self {
-            seq_id: seq_id.clone(),
+            seq_id: seq_id.to_owned(),
             kmers: HashMap::new(),
         }
     }
@@ -25,12 +25,12 @@ impl KmerTable {
 
     pub fn add(&mut self, seq: &str, loc: u32) {
         self.kmers.entry(seq.to_string())
-            .or_insert(Vec::<u32>::new()).push(loc);
+            .or_default().push(loc);
     }
 
     pub fn get(&self, seq: &str) -> Vec<u32> {
         match self.kmers.get(seq) {
-            Some(&ref kmer_locs) => kmer_locs.clone(),
+            Some(kmer_locs) => kmer_locs.clone(),
             _ => Vec::<u32>::new() // return empty vector
         }
     }
