@@ -1,40 +1,51 @@
 use std::collections::HashMap;
 use std::fs;
 
-use anyhow::{anyhow, Result, Context};
+use anyhow::{anyhow, Context, Result, Error};
 
+#[derive(Debug)]
+pub struct Fasta {
+    seqs: HashMap<String, String>
 
+}
 
+impl Fasta {
+    pub fn from_file(file: &str) -> Result<Self, Error> {
+        let fasta_string = fs::read_to_string(file)
+            .context("Could not read Fasta file")?;
+        match Self::from_string(fasta_string) {
+            Ok(instance) => Ok(instance),
+            Err(e) => Err(anyhow!("Issue processing fasta file: {e:?}")),
+        }
+    }
 
-pub fn read_fasta(fasta_file: &str) -> Result<HashMap<String, String>> {
-    let mut contigs: HashMap<String, String> = HashMap::new();
+    pub fn from_string(fasta: String) -> Result<Self, Error> {
+        let mut seqs: HashMap<String, String> = HashMap::new();
+        let seq_entries: Vec<&str> = fasta.split(">")
+            .collect::<Vec<&str>>()[1..]
+            .to_vec();
 
-    let fasta = fs::read_to_string(fasta_file)
-        .context("Could not read Fasta file")?;
-    let seq_entries: Vec<&str> = fasta.split(">")
-        .collect::<Vec<&str>>()[1..]
-        .to_vec();
-
-    // Check file has contents
-    if seq_entries.is_empty() {
-        return Err(anyhow!("Fasta file {fasta_file} is empty"))
-    };
-
-    for entry in seq_entries {
-        // Check header is valid
-        if let Some('\n') = entry.chars().next() {
-            return Err(anyhow!("Fasta contained header line with no sequence name. (i.e., just '>')"))
-            }
-
-        let mut lines = entry.lines();
-        let header = match lines.next() {
-            Some(line) => line.to_string(),
-            _ => return Err(anyhow!("No lines found in Fasta file")),
+        // Check file has contents
+        if seq_entries.is_empty() {
+            return Err(anyhow!("Sequence is empty"))
         };
 
-        let seq = lines.collect::<Vec<&str>>()
-            .join("");
-        contigs.insert(header, seq);
+        for entry in seq_entries {
+            // Check header is valid
+            if let Some('\n') = entry.chars().next() {
+                return Err(anyhow!("Sequence contained header line with no sequence name. (i.e., just '>')"))
+                };
+
+            let mut lines = entry.lines();
+            let header = match lines.next() {
+                Some(line) => line.to_string(),
+                _ => return Err(anyhow!("Invalid format sequence found")),
+            };
+
+            let seq = lines.collect::<Vec<&str>>()
+                .join("");
+            seqs.insert(header, seq);
+        }
+    Ok(Self{seqs})
     }
-    Ok(contigs)
 }
