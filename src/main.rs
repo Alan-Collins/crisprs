@@ -1,7 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-#![allow(unreachable_code)]
+use std::process;
 
 use crisprs::{
     cli,
@@ -10,6 +7,8 @@ use crisprs::{
 
 fn main() {
     let args = cli::Opts::parse_args();
-    let res = run(args);
-    
+    if let Err(e) = run(args) {
+        println!("crisprs failed with the following error: {e}");
+        process::exit(1);
+    }
 }

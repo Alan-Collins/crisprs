@@ -1,28 +1,23 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(unused_imports)]
+#![allow(unreachable_code)]
+
 use std::error::Error;
-use std::fs;
+
+use anyhow::{anyhow, Result, Context};
+
 
 mod seq;
 pub mod cli;
-
 pub use seq::{kmer, fasta};
 
 pub fn run(args: cli::Opts) -> Result<(), Box<dyn Error>> {
-    let assembly = fs::read_to_string(&args.assembly())
-        .expect("Could not read assembly file");
-    let contigs: Vec<&str> = assembly.split(">")
-        .collect::<Vec<&str>>()[1..]
-        .to_vec();
-    for entry in contigs {
-        let mut lines = entry.split_whitespace();
-        let header = lines.next()
-            .expect("Assembly contained header line with no sequence name. (i.e., just '>')");
-
-        // let header = lines.pop();
-        let seq = lines.collect::<Vec<&str>>()
-            .join("");
-        println!("{:?}", header);
-        println!("{:?}", seq);
-    }
+    let contigs = fasta::read_fasta(args.assembly())
+        .unwrap_or_else(|error| {
+            panic!("Issue loading assembly: {error:?}");
+        });
+    println!("{:#?}", contigs);
     Ok(())
 }
 
