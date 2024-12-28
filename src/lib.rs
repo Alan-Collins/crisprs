@@ -8,7 +8,8 @@ use std::error::Error;
 use anyhow::{anyhow, Result, Context};
 
 
-mod seq;
+pub mod seq;
+pub mod crispr;
 pub mod cli;
 pub use seq::{kmer, fasta};
 
