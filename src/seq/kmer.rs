@@ -5,10 +5,12 @@
 
 use std::collections::HashMap;
 
+use crate::seq::fasta;
+
 #[derive(Debug)]
 pub struct KmerTable {
     seq_id: String,
-    kmers: HashMap<String, Vec<u32>>,
+    kmers: HashMap<fasta::Seq, Vec<u32>>,
 }
 
 impl KmerTable {
@@ -23,15 +25,38 @@ impl KmerTable {
         println!("{:#?}", self);
     }
 
-    pub fn add(&mut self, seq: &str, loc: u32) {
-        self.kmers.entry(seq.to_string())
+    pub fn add(&mut self, seq: fasta::Seq, loc: u32) {
+        self.kmers.entry(seq)
             .or_default().push(loc);
     }
 
-    pub fn get(&self, seq: &str) -> Vec<u32> {
-        match self.kmers.get(seq) {
-            Some(kmer_locs) => kmer_locs.clone(),
-            _ => Vec::<u32>::new() // return empty vector
-        }
+    pub fn get(&self, seq: &fasta::Seq) -> Option<&Vec<u32>> {
+        self.kmers.get(seq)
     }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use fasta::Fasta;
+
+    use super::*;
+
+    #[test]
+    fn kmer_table_empty_get_returns_nothing() {
+        let k_table = KmerTable::new("test");
+        let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
+        let result = k_table.get(&k);
+        assert!(result.is_none());
+    }
+
+    fn kmer_table_get_returns_locs() {
+        let mut k_table = KmerTable::new("test");
+        let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
+        k_table.add(k.clone(), 5);
+        let result = k_table.get(&k).unwrap();
+        let expected = Vec::<u32>::from([5]);
+        assert_eq!(result, &expected);
+    }
+
 }
