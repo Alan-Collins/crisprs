@@ -9,14 +9,12 @@ use crate::seq::fasta;
 
 #[derive(Debug)]
 pub struct KmerTable {
-    seq_id: String,
     kmers: HashMap<fasta::Seq, Vec<u32>>,
 }
 
 impl KmerTable {
-    pub fn new(seq_id: &str) -> Self{
+    pub fn new() -> Self{
         Self {
-            seq_id: seq_id.to_owned(),
             kmers: HashMap::new(),
         }
     }
@@ -35,6 +33,12 @@ impl KmerTable {
     }
 }
 
+impl Default for KmerTable {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -44,14 +48,14 @@ mod tests {
 
     #[test]
     fn kmer_table_empty_get_returns_nothing() {
-        let k_table = KmerTable::new("test");
+        let k_table = KmerTable::new();
         let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
         let result = k_table.get(&k);
         assert!(result.is_none());
     }
 
     fn kmer_table_get_returns_locs() {
-        let mut k_table = KmerTable::new("test");
+        let mut k_table = KmerTable::new();
         let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
         k_table.add(k.clone(), 5);
         let result = k_table.get(&k).unwrap();
