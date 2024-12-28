@@ -6,9 +6,9 @@ use anyhow::{anyhow, Context, Result, Error};
 #[derive(Debug)]
 pub struct Fasta {
     seqs: HashMap<String, String>
-
 }
 
+// Constructors
 impl Fasta {
     pub fn from_file(file: &str) -> Result<Self, Error> {
         let fasta_string = fs::read_to_string(file)
@@ -55,6 +55,16 @@ impl Fasta {
             seqs.insert(header, seq);
         }
     Ok(Self{seqs})
+    }
+}
+
+// Methods
+impl Fasta {
+    pub fn get_seq(&self, name: &str) -> Result<&str> {
+        match self.seqs.get(name) {
+            Some(s) => Ok(s),
+            _ => Err(anyhow!("Sequence name {name:?} not found"))
+        }
     }
 }
 
