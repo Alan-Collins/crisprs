@@ -9,7 +9,7 @@ const DNA_BASES: &str = "ATCGN";
 
 #[derive(Debug)]
 pub struct Fasta {
-    seqs: HashMap<String, String>
+    seqs: HashMap<String, Seq>
 }
 
 // Constructors
@@ -24,7 +24,7 @@ impl Fasta {
     }
 
     pub fn from_string(fasta: String) -> Result<Self, Error> {
-        let mut seqs: HashMap<String, String> = HashMap::new();
+        let mut seqs: HashMap<String, Seq> = HashMap::new();
         let seq_entries: Vec<&str> = fasta.split(">")
             .collect::<Vec<&str>>()[1..]
             .to_vec();
@@ -56,7 +56,11 @@ impl Fasta {
 
             let seq = lines.collect::<Vec<&str>>()
                 .join("");
-            seqs.insert(header, seq);
+            let dna = match Seq::from_dna(seq) {
+                Ok(s) => s,
+                Err(e) => return Err(e),
+            };
+            seqs.insert(header, dna);
         }
     Ok(Self{seqs})
     }
@@ -64,7 +68,7 @@ impl Fasta {
 
 // Methods
 impl Fasta {
-    pub fn get_seq(&self, name: &str) -> Result<&str> {
+    pub fn get_seq(&self, name: &str) -> Result<&Seq> {
         match self.seqs.get(name) {
             Some(s) => Ok(s),
             _ => Err(anyhow!("Sequence name {name:?} not found"))
