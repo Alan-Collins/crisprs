@@ -118,6 +118,13 @@ impl Seq {
     }
 }
 
+impl std::fmt::Display for Seq {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.write_str(&self.seq)?;
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
