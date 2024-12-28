@@ -10,7 +10,8 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: trailing-whitespace
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
+  - repo: https://github.com/AndrejOrsula/pre-commit-cargo/
+    rev: 0.4.0
     hooks:
-      - id: clippy
+     - id: cargo-clippy
+     - id: cargo-test
