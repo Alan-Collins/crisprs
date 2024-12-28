@@ -1,13 +1,14 @@
 use crate::fasta::{Seq, Fasta};
 use crate::kmer::KmerTable;
 
-struct CRISPRArray {
+pub struct CRISPRArray {
     repeats: Vec<Seq>,
     spacers: Vec<Seq>,
     source_name: String,
     location: [usize; 2],
 }
 
+// methods
 impl CRISPRArray {
     pub fn to_fasta(&self, header: &str) -> String {
         let mut seq_list = Vec::<String>::with_capacity(self.repeats.len()*2);
