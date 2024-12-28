@@ -32,6 +32,14 @@ impl Fasta {
 
         for entry in seq_entries {
             // Check header is valid
+            match entry.chars().next() {
+                Some('\n') => return Err(anyhow!("Sequence contained header line with no sequence name. (i.e., just '>')")),
+                Some('>') => (),
+                Some(_) => return Err(anyhow!("fasta sequence does not begin with header line")),
+                _ => return Err(anyhow!("fasta sequence is just '>'"))
+            }
+
+
             if let Some('\n') = entry.chars().next() {
                 return Err(anyhow!("Sequence contained header line with no sequence name. (i.e., just '>')"))
                 };
@@ -79,6 +87,13 @@ mod tests {
     #[test]
     fn fasta_from_string_missing_header_is_err() {
         let fasta_string = "ATCG\n>2\nATCG".to_string();
+        let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn fasta_from_string_just_gt_is_err() {
+        let fasta_string = ">".to_string();
         let result = Fasta::from_string(fasta_string);
         assert!(result.is_err());
     }
