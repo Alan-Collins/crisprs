@@ -72,7 +72,7 @@ impl Fasta {
     }
 }
 
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Seq {
     seq: String
 }
