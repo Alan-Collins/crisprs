@@ -5,7 +5,7 @@ use anyhow::{anyhow, Context, Result, Error};
 
 // Private constants
 
-const DNA_BASES: &str = "ATCGNatcgn";
+const DNA_BASES: &str = "ATCGN";
 
 #[derive(Debug)]
 pub struct Fasta {
@@ -81,8 +81,8 @@ pub struct Seq {
 impl Seq {
     pub fn from_dna(bases: String) -> Result<Self> {
         let bases = match bases.contains("\n") {
-            true => bases.replace('\n', ""),
-            false => bases,
+            true => bases.replace('\n', "").to_uppercase(),
+            false => bases.to_uppercase(),
         };
         if !bases.chars().all(|b| DNA_BASES.contains(b)) {
             return Err(anyhow!("non-ATCGN base found in DNA sequence"))
@@ -99,6 +99,22 @@ impl Seq {
         let new_instance = Self::from_dna(slice)
             .expect("A Slice of an existing Seq should not throw any errors");
         Ok(new_instance)
+    }
+
+    pub fn rev_comp(&self) -> Seq {
+        let rc = Self::from_dna(
+            self.seq.chars().rev()
+                .map(|b| match b {
+                    'A' => 'T',
+                    'T' => 'A',
+                    'C' => 'G',
+                    'G' => 'C',
+                    'N' => 'N',
+                    _ => panic!("A non-DNA base was found in an existing Seq instance: {b}"),
+                })
+                .collect::<String>()
+        ).expect("Self should only contain legal bases.");
+        rc
     }
 }
 
@@ -152,5 +168,19 @@ mod tests {
     fn seq_from_dna_non_atcgn() {
         let result = Seq::from_dna("ATCGXATCG".to_string());
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn seq_from_dna_lowercase_converted() {
+        let result = Seq::from_dna("atcgn".to_string()).unwrap();
+        let expected = Seq::from_dna("ATCGN".to_string()).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn seq_rev_comp_works() {
+        let result = Seq::from_dna("ATCGN".to_string()).unwrap()
+            .rev_comp();
+        let expected = Seq::from_dna("NCGAT".to_string()).unwrap();
     }
 }
