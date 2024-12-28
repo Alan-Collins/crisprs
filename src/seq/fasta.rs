@@ -1,7 +1,11 @@
-use std::collections::HashMap;
+use std::{any, collections::HashMap, collections::HashSet};
 use std::fs;
 
 use anyhow::{anyhow, Context, Result, Error};
+
+// Private constants
+
+const DNA_BASES: &str = "ATCGNatcgn";
 
 #[derive(Debug)]
 pub struct Fasta {
@@ -68,6 +72,35 @@ impl Fasta {
     }
 }
 
+#[derive(Debug, Hash, Eq, PartialEq)]
+pub struct Seq {
+    seq: String
+}
+
+// Constructors
+impl Seq {
+    pub fn from_dna(bases: String) -> Result<Self> {
+        let bases = match bases.contains("\n") {
+            true => bases.replace('\n', ""),
+            false => bases,
+        };
+        if !bases.chars().all(|b| DNA_BASES.contains(b)) {
+            return Err(anyhow!("non-ATCGN base found in DNA sequence"))
+        }
+        Ok(Self {seq: bases})
+    }
+}
+
+impl Seq {
+    pub fn get_range(&self, start: usize, stop: usize) -> Result<Self> {
+        if start >= self.seq.len() {return Err(anyhow!("start index must be less than sequence length"))}
+        if stop > self.seq.len() {return Err(anyhow!("stop index must be less than or equal to sequence length"))}
+        let slice = self.seq[start..stop].to_string();
+        let new_instance = Self::from_dna(slice)
+            .expect("A Slice of an existing Seq should not throw any errors");
+        Ok(new_instance)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -105,6 +138,19 @@ mod tests {
     fn fasta_from_string_just_gt_is_err() {
         let fasta_string = ">".to_string();
         let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn seq_from_dna_strips_newline() {
+        let result = Seq::from_dna("ATCG\nATCG".to_string()).unwrap();
+        let expected = Seq::from_dna("ATCGATCG".to_string()).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn seq_from_dna_non_atcgn() {
+        let result = Seq::from_dna("ATCGXATCG".to_string());
         assert!(result.is_err());
     }
 }
