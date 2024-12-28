@@ -49,3 +49,37 @@ impl Fasta {
     Ok(Self{seqs})
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fasta_from_string_blank_header_is_err() {
+        let fasta_string = ">\nATCG\n>2\nATCG".to_string();
+        let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn fasta_from_string_blank_is_err() {
+        let fasta_string = "".to_string();
+        let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn fasta_from_string_newline_is_err() {
+        let fasta_string = "\n".to_string();
+        let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn fasta_from_string_missing_header_is_err() {
+        let fasta_string = "ATCG\n>2\nATCG".to_string();
+        let result = Fasta::from_string(fasta_string);
+        assert!(result.is_err());
+    }
+}
