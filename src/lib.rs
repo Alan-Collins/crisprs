@@ -14,16 +14,15 @@ pub mod cli;
 pub use seq::{kmer, fasta};
 
 pub fn run(args: cli::Opts) -> Result<(), Box<dyn Error>> {
-    // let contigs = fasta::read_fasta(args.assembly())
-    //     .unwrap_or_else(|error| {
-    //         panic!("Issue loading assembly: {error:?}");
-    //     });
-
     let contigs = fasta::Fasta::from_file(args.assembly())
         .unwrap_or_else(|error| {
             panic!("Issue loading assembly: {error:?}");
-        });
-    println!("{:#?}", contigs);
+        }
+    );
+    for (name, seq) in contigs.iter() {
+        let crs = crispr::find_crisprs(seq, name, 11usize);
+    };
+
     Ok(())
 }
 
