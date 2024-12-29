@@ -75,6 +75,10 @@ impl Fasta {
             _ => Err(anyhow!("Sequence name {name:?} not found"))
         }
     }
+
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, String, Seq>  {
+        self.seqs.iter()
+    }
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
