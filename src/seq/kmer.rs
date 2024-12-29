@@ -3,15 +3,28 @@
 #![allow(unused_imports)]
 #![allow(unreachable_code)]
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
-use crate::seq::fasta;
+use crate::seq::fasta::{Fasta, Seq};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct KmerTable {
-    kmers: HashMap<fasta::Seq, Vec<u32>>,
+    kmers: HashMap<Seq, Vec<usize>>,
 }
 
+// methods
+impl KmerTable {
+    pub fn add(&mut self, seq: Seq, loc: usize) {
+        self.kmers.entry(seq)
+            .or_default().push(loc);
+    }
+
+    pub fn get(&self, seq: &Seq) -> Option<&Vec<usize>> {
+        self.kmers.get(seq)
+    }
+}
+
+// constructors
 impl KmerTable {
     pub fn new() -> Self{
         Self {
@@ -19,19 +32,33 @@ impl KmerTable {
         }
     }
 
-    pub fn view(&self) {
-        println!("{:#?}", self);
-    }
-
-    pub fn add(&mut self, seq: fasta::Seq, loc: u32) {
-        self.kmers.entry(seq)
-            .or_default().push(loc);
-    }
-
-    pub fn get(&self, seq: &fasta::Seq) -> Option<&Vec<u32>> {
-        self.kmers.get(seq)
+    pub fn from_seq(s: &Seq, k: usize) -> Self {
+        let mut kt = Self::new();
+        let mut vd = VecDeque::with_capacity(k);
+        // Initial kmer
+        for i in 0..k {
+            vd.push_back(s.get_base(i));
+        };
+        let seq = Seq::from_dna(
+                vd.iter().map(|x| x.as_ref().expect("Seq should only yield valid seq").to_string())
+                .collect()
+            ).expect("Combining bases from Seq should yield valid Seq");
+        let mut k_start_pos = 0usize;
+        kt.add(seq, k_start_pos);
+        for new_base_pos in k..s.len() {
+            k_start_pos += 1;
+            vd.pop_front();
+            vd.push_back(s.get_base(new_base_pos));
+            let seq = Seq::from_dna(
+                    vd.iter().map(|x| x.as_ref().expect("Seq should only yield valid seq").to_string())
+                    .collect()
+                ).expect("Combining bases from Seq should yield valid Seq");
+            kt.add(seq, k_start_pos);
+        }
+        kt
     }
 }
+
 
 impl Default for KmerTable {
     fn default() -> Self {
@@ -42,25 +69,39 @@ impl Default for KmerTable {
 
 #[cfg(test)]
 mod tests {
-    use fasta::Fasta;
-
     use super::*;
 
     #[test]
     fn kmer_table_empty_get_returns_nothing() {
         let k_table = KmerTable::new();
-        let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
+        let k = Seq::from_dna("ATCG".to_string()).unwrap();
         let result = k_table.get(&k);
         assert!(result.is_none());
     }
 
+    #[test]
     fn kmer_table_get_returns_locs() {
         let mut k_table = KmerTable::new();
-        let k = fasta::Seq::from_dna("ATCG".to_string()).unwrap();
-        k_table.add(k.clone(), 5);
+        let k = Seq::from_dna("ATCG".to_string()).unwrap();
+        k_table.add(k.clone(), 5usize);
         let result = k_table.get(&k).unwrap();
-        let expected = Vec::<u32>::from([5]);
+        let expected = Vec::<usize>::from([5]);
         assert_eq!(result, &expected);
     }
 
+    #[test]
+    fn kmer_from_seq_works() {
+        let s = Seq::from_dna("ATCGATCG".to_string()).unwrap();
+        let result = KmerTable::from_seq(&s, 4usize);
+        let expected = KmerTable{
+            kmers: HashMap::from([
+                (Seq::from_dna("ATCG".to_string()).unwrap(), vec![0usize, 4usize]),
+                (Seq::from_dna("TCGA".to_string()).unwrap(), vec![1usize]),
+                (Seq::from_dna("CGAT".to_string()).unwrap(), vec![2usize]),
+                (Seq::from_dna("GATC".to_string()).unwrap(), vec![3usize]),
+            ])
+        };
+        assert_eq!(result, expected)
+
+    }
 }
