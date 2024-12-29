@@ -96,6 +96,10 @@ impl Seq {
 }
 
 impl Seq {
+    pub fn len(&self) -> usize {
+        self.seq.len()
+    }
+
     pub fn get_range(&self, start: usize, stop: usize) -> Result<Self> {
         if start >= self.seq.len() {return Err(anyhow!("start index must be less than sequence length"))}
         if stop > self.seq.len() {return Err(anyhow!("stop index must be less than or equal to sequence length"))}
