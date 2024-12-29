@@ -24,22 +24,23 @@ impl Fasta {
     }
 
     pub fn from_string(fasta: String) -> Result<Self, Error> {
+        // check input starts with valid characters
+        match &fasta.trim().chars().next() {
+            Some('>') => (),
+            Some(_) => return Err(anyhow!("fasta sequence does not begin with header line")),
+            _ => return Err(anyhow!("Sequence is empty")),
+        }
+
         let mut seqs: HashMap<String, Seq> = HashMap::new();
         let seq_entries: Vec<&str> = fasta.split(">")
             .collect::<Vec<&str>>()[1..]
             .to_vec();
 
-        // Check file has contents
-        if seq_entries.is_empty() {
-            return Err(anyhow!("Sequence is empty"))
-        };
-
         for entry in seq_entries {
             // Check header is valid
             match entry.chars().next() {
                 Some('\n') => return Err(anyhow!("Sequence contained header line with no sequence name. (i.e., just '>')")),
-                Some('>') => (),
-                Some(_) => return Err(anyhow!("fasta sequence does not begin with header line")),
+                Some(_) => (),
                 _ => return Err(anyhow!("fasta sequence is just '>'"))
             }
 
