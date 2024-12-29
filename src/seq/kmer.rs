@@ -71,6 +71,33 @@ impl Default for KmerTable {
 }
 
 
+pub struct KmerLocs {
+    k: Seq,
+    locs: Vec<usize>,
+}
+
+
+// methods
+impl KmerLocs {
+    pub fn k(&self) -> Seq {
+        self.k.clone()
+    }
+
+    pub fn locs(&self) -> Vec<usize> {
+        self.locs.clone()
+    }
+}
+
+// constructors
+impl KmerLocs {
+    pub fn new(k: Seq, locs: Vec<usize>) -> Self {
+        Self {
+            k,
+            locs
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
