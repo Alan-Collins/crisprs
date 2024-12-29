@@ -22,6 +22,10 @@ impl KmerTable {
     pub fn get(&self, seq: &Seq) -> Option<&Vec<usize>> {
         self.kmers.get(seq)
     }
+
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, Seq, Vec<usize>>  {
+        self.kmers.iter()
+    }
 }
 
 // constructors
