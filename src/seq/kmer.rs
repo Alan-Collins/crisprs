@@ -70,7 +70,7 @@ impl Default for KmerTable {
     }
 }
 
-
+#[derive(Clone, Debug)]
 pub struct KmerLocs {
     k: Seq,
     locs: Vec<usize>,
