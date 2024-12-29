@@ -105,6 +105,14 @@ impl Seq {
         Ok(new_instance)
     }
 
+    pub fn get_base(&self, index: usize) -> Result<Self> {
+        if index > self.seq.len() {return Err(anyhow!("index must be less than sequence length"))}
+        let base = self.seq[index..index+1].to_string();
+        let new_instance = Self::from_dna(base)
+            .expect("A Slice of an existing Seq should not throw any errors");
+        Ok(new_instance)
+    }
+
     pub fn rev_comp(&self) -> Seq {
         let rc = Self::from_dna(
             self.seq.chars().rev()
@@ -194,4 +202,19 @@ mod tests {
             .rev_comp();
         let expected = Seq::from_dna("NCGAT".to_string()).unwrap();
     }
+
+    #[test]
+    fn seq_slicing_works() {
+        let result = Seq::from_dna("ATCGN".to_string()).unwrap()
+            .get_range(2, 4).unwrap();
+        let expected = Seq::from_dna("CG".to_string()).unwrap();
+    }
+
+    #[test]
+    fn seq_indexing_works() {
+        let result = Seq::from_dna("ATCGN".to_string()).unwrap()
+            .get_base(1).unwrap();
+        let expected = Seq::from_dna("T".to_string()).unwrap();
+    }
+
 }
