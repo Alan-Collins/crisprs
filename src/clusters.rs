@@ -27,7 +27,7 @@ impl<T: Hash + Eq + Clone> Clusters<T> {
         // make cluster
         let mut cluster = Cluster::new(node_a.clone());
         cluster.add(node_b.clone());
-        
+
         // add cluster
         new_clusters.add_cluster(cluster);
 
@@ -70,15 +70,15 @@ impl<T: Hash + Eq + Clone> Clusters<T> {
         // remove clus_b and update memberships
         let clus_b= self.clusters.remove(&clus_num_b)
             .expect("cluster numbers should correspond to clusters");
-            
+
         for mem in clus_b.get_members() {
                 self.membership.insert(mem.clone(), clus_num_a);
             }
-        
+
         // merge clusters
         self.clusters.get_mut(&clus_num_a)
             .expect("cluster numbers should correspond to clusters")
-            .merge(clus_b);        
+            .merge(clus_b);
     }
 
     pub fn add_edge(&mut self, node_a: T, node_b: T) {
@@ -100,7 +100,7 @@ impl <T: Hash + Eq + Clone> PartialEq for Clusters<T> {
         let b: HashSet<&Cluster<T>> = HashSet::from_iter(other.clusters.values());
         a == b
     }
-    
+
     fn ne(&self, other: &Self) -> bool {
         !self.eq(other)
     }
@@ -153,7 +153,7 @@ mod tests {
         let node_a = 1;
         let node_b = 2;
         let node_c = 3;
-        let node_d = 4; 
+        let node_d = 4;
         let mut result = Clusters::from_node_pair(&node_a, &node_b);
         result.add_edge(node_c.clone(), node_d.clone());
         result.add_edge(node_a.clone(), node_d.clone());
