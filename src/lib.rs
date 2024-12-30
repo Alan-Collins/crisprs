@@ -13,6 +13,8 @@ pub mod crispr;
 pub mod cli;
 pub use seq::{kmer, fasta};
 
+mod clusters;
+
 pub fn run(args: cli::Opts) -> Result<(), Box<dyn Error>> {
     let contigs = fasta::Fasta::from_file(args.assembly())
         .unwrap_or_else(|error| {
